@@ -1,0 +1,1043 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Xyurei Offc</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: landing penuh lebar dengan mock dock 3 kolom; dashboard & tutorial memakai sidebar kiri + konten kanan. */
+:root {
+  --bg: #01030a;
+  --surface: #050b1d;
+  --surface2: #0c1838;
+  --line: rgba(110, 160, 255, 0.17);
+  --fg: #e8eefc;
+  --muted: #93a3cb;
+  --accent: #2e78ff;
+  --accent-ink: #ffffff;
+  --cyan: #00d0ff;
+  --c-import: #00d0ff;
+  --c-upload: #86a8ff;
+  --c-tools: #2fe0c0;
+  --ok: #46f4b0;
+  --warn: #ffd846;
+  --danger: #ff7a7a;
+  --code-bg: #00020a;
+  --font-display: "Chakra Petch", "Segoe UI", sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+/* Default selalu gelap (hitam). Tema terang hanya aktif kalau dipilih lewat tombol Tema. */
+:root[data-theme="light"] {
+  --bg: #f2f5fc; --surface: #ffffff; --surface2: #e6edfb; --line: rgba(20, 40, 100, 0.14);
+  --fg: #0b1530; --muted: #52618a; --accent: #1d5fe0; --accent-ink: #ffffff; --cyan: #0079a6;
+  --c-import: #0083b0; --c-upload: #3b62d6; --c-tools: #0b8f79;
+  --ok: #0a7f55; --warn: #8a6500; --danger: #c13434; --code-bg: #eaf0fc;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.6;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg);
+}
+a { color: inherit; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.15; letter-spacing: 0.005em; }
+p { margin: 0; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; border-radius: 4px; }
+.wrap {
+  max-width: 1160px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.mono { font-family: var(--font-mono); }
+
+/* ---------- top bar ---------- */
+.top {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+.top .wrap { display: flex; align-items: center; gap: 16px; height: 56px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-family: var(--font-display); font-weight: 700; font-size: 18px; }
+.brand i {
+  width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center; font-style: normal; font-size: 14px;
+  background: var(--accent); color: var(--accent-ink);
+}
+.top nav { display: flex; gap: 4px; margin-left: auto; align-items: center; }
+.top nav a, .theme {
+  text-decoration: none; padding: 7px 12px; border-radius: 8px; color: var(--muted); font-weight: 500; font-size: 14px;
+  background: none; border: 0;
+}
+.top nav a:hover, .theme:hover { color: var(--fg); background: var(--surface); }
+.top nav a[aria-current="page"] { color: var(--fg); background: var(--surface); }
+.theme { border: 1px solid var(--line); }
+
+/* ---------- tombol ---------- */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 600; font-size: 14px;
+  padding: 11px 18px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--fg);
+}
+.btn:hover { border-color: var(--cyan); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { filter: brightness(1.1); }
+
+/* ---------- landing ---------- */
+.hero { padding-block: 56px 40px; }
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 40px; align-items: center; }
+.pill {
+  display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--muted);
+  border: 1px solid var(--line); border-radius: 99px; padding: 5px 12px; background: var(--surface);
+}
+.pill b { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); }
+.hero h1 { font-size: clamp(34px, 5.4vw, 60px); font-weight: 700; margin-top: 18px; }
+.hero h1 em { font-style: normal; color: var(--cyan); }
+.hero p.lead { margin-top: 16px; color: var(--muted); font-size: 16px; max-width: 46ch; }
+.hero .cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+.hero .facts { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 28px; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+
+.dock {
+  display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.25fr) minmax(0, 0.8fr); gap: 10px; align-items: stretch;
+  padding: 14px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface);
+}
+.win { border: 1px solid var(--line); border-radius: 12px; background: var(--bg); padding: 10px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.win .bar { display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+.win .bar i { width: 6px; height: 6px; border-radius: 50%; background: var(--c-tools); }
+.win.mid .bar i { background: var(--cyan); }
+.disc {
+  width: 70%; aspect-ratio: 1; margin: 6px auto; border-radius: 50%;
+  background: radial-gradient(circle, var(--bg) 0 8%, var(--surface2) 9% 30%, var(--bg) 31% 34%, var(--surface2) 35% 62%, var(--bg) 63% 66%, var(--surface2) 67%);
+  border: 2px solid var(--c-upload); animation: spin 14s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.ph { height: 8px; border-radius: 4px; background: var(--surface2); }
+.ph.s { width: 60%; } .ph.m { width: 80%; }
+.minis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+.mini { border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; background: var(--surface); }
+.mini small { display: block; font-family: var(--font-mono); font-size: 9px; color: var(--muted); }
+.mini b { font-family: var(--font-display); font-size: 18px; }
+.chips { display: flex; gap: 4px; flex-wrap: wrap; }
+.chips span { font-family: var(--font-mono); font-size: 9px; padding: 2px 6px; border-radius: 5px; background: var(--surface2); color: var(--muted); }
+.chips span.on { background: var(--accent); color: var(--accent-ink); }
+.row { display: flex; align-items: center; gap: 6px; padding: 5px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); }
+.row i { width: 18px; height: 18px; border-radius: 4px; background: var(--surface2); flex: none; }
+.row .ph { flex: 1; }
+
+.section { padding-block: 48px; border-top: 1px solid var(--line); }
+.section h2 { font-size: clamp(24px, 3.2vw, 34px); }
+.section .sub { color: var(--muted); margin-top: 8px; max-width: 60ch; }
+.groups { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; margin-top: 28px; }
+.group h3 { font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-family: var(--font-mono); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.group h3::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--g); }
+.group ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.group li a { display: block; text-decoration: none; padding: 12px 2px; border-bottom: 1px solid var(--line); }
+.group li a:hover b { color: var(--cyan); }
+.group li b { font-family: var(--font-display); font-size: 16px; display: block; }
+.group li span { color: var(--muted); font-size: 13px; }
+.g-import { --g: var(--c-import); } .g-upload { --g: var(--c-upload); } .g-tools { --g: var(--c-tools); }
+
+.quick { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin-top: 28px; counter-reset: q; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.quick li { list-style: none; padding: 18px; border-right: 1px solid var(--line); background: var(--surface); counter-increment: q; }
+.quick li:last-child { border-right: 0; }
+.quick li::before { content: counter(q); font-family: var(--font-display); font-weight: 700; font-size: 26px; color: var(--cyan); display: block; margin-bottom: 6px; }
+.quick b { display: block; font-family: var(--font-display); font-size: 16px; margin-bottom: 4px; }
+.quick span { color: var(--muted); font-size: 13px; }
+.quick { padding: 0; margin-inline: 0; }
+footer.foot { border-top: 1px solid var(--line); padding-block: 28px; color: var(--muted); font-size: 13px; }
+footer.foot .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
+
+/* ---------- app shell (dashboard + tutorial) ---------- */
+.shell { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 32px; padding-block: 28px 64px; }
+.side { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 72px); align-self: start; max-height: calc(100vh - 100px); overflow-y: auto; }
+.side h4 { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 18px 0 6px; font-weight: 600; }
+.side h4:first-child { margin-top: 0; }
+.side a { display: flex; align-items: center; gap: 9px; text-decoration: none; padding: 7px 10px; border-radius: 8px; color: var(--muted); font-size: 14px; font-weight: 500; }
+.side a:hover { background: var(--surface); color: var(--fg); }
+.side a[aria-current="page"] { background: var(--surface2); color: var(--fg); }
+.side a i { font-style: normal; font-family: var(--font-mono); font-size: 10px; width: 24px; height: 20px; border-radius: 5px; display: grid; place-items: center; background: var(--surface); color: var(--g, var(--muted)); border: 1px solid var(--line); flex: none; }
+.main { min-width: 0; }
+
+.page-title { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; }
+.page-title h1 { font-size: clamp(28px, 4vw, 40px); font-weight: 700; }
+.page-title p { color: var(--muted); margin-top: 6px; max-width: 58ch; }
+.search { position: relative; }
+.search input {
+  width: 260px; max-width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface);
+  color: var(--fg); font: inherit; font-size: 14px;
+}
+.search input::placeholder { color: var(--muted); }
+
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 24px; }
+.stat { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; background: var(--surface); }
+.stat small { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: 0.04em; }
+.stat b { display: block; font-family: var(--font-display); font-size: 32px; line-height: 1.1; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 12px; color: var(--muted); }
+
+.filters { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 28px; }
+.filters button { border: 1px solid var(--line); background: var(--surface); padding: 6px 14px; border-radius: 99px; font-size: 13px; font-weight: 500; color: var(--muted); }
+.filters button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+.card {
+  display: flex; flex-direction: column; gap: 10px; text-decoration: none; padding: 16px; border-radius: 14px;
+  border: 1px solid var(--line); background: var(--surface); min-width: 0; transition: border-color .15s, transform .15s;
+}
+.card:hover { border-color: var(--g); transform: translateY(-2px); }
+.card .ic { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; font-family: var(--font-mono); font-weight: 600; font-size: 13px; color: var(--g); border: 1px solid var(--g); background: var(--bg); }
+.card b { font-family: var(--font-display); font-size: 17px; }
+.card p { color: var(--muted); font-size: 13px; line-height: 1.5; }
+.card .go { margin-top: auto; font-size: 12px; font-family: var(--font-mono); color: var(--g); }
+.empty { color: var(--muted); padding: 24px 0; }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; margin-top: 14px; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); background: var(--surface); font-weight: 600; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td code, p code, li code, .kbd {
+  font-family: var(--font-mono); font-size: 12.5px; background: var(--surface2); padding: 1px 6px; border-radius: 5px; white-space: nowrap;
+}
+.btnchip { font-family: var(--font-mono); font-weight: 600; font-size: 12px; background: var(--accent); color: var(--accent-ink); padding: 3px 9px; border-radius: 6px; white-space: nowrap; display: inline-block; }
+
+/* ---------- halaman tutorial ---------- */
+.crumbs { font-family: var(--font-mono); font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+.crumbs a { text-decoration: none; } .crumbs a:hover { color: var(--cyan); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.meta span { font-family: var(--font-mono); font-size: 12px; padding: 4px 10px; border: 1px solid var(--line); border-radius: 99px; background: var(--surface); color: var(--muted); }
+.meta span b { color: var(--g); font-weight: 600; }
+.block { margin-top: 36px; }
+.block > h2 { font-size: 22px; margin-bottom: 14px; }
+.need { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.need li { padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); display: flex; gap: 10px; }
+.need li::before { content: "✓"; color: var(--ok); font-weight: 700; }
+.steps { margin: 0; padding: 0; list-style: none; counter-reset: s; display: grid; gap: 0; border-left: 2px solid var(--line); margin-left: 15px; }
+.steps li { counter-increment: s; position: relative; padding: 0 0 22px 28px; }
+.steps li:last-child { padding-bottom: 0; }
+.steps li::before {
+  content: counter(s); position: absolute; left: -17px; top: -2px; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center;
+  font-family: var(--font-display); font-weight: 700; background: var(--bg); border: 2px solid var(--g, var(--cyan)); color: var(--fg);
+}
+.steps b { font-family: var(--font-display); font-size: 17px; display: block; }
+.steps p { color: var(--muted); margin-top: 2px; max-width: 68ch; }
+.notes { margin: 0; padding-left: 20px; display: grid; gap: 8px; max-width: 72ch; }
+.notes li::marker { color: var(--g, var(--cyan)); }
+.code { position: relative; margin-top: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--code-bg); }
+.code .cap { display: flex; justify-content: space-between; align-items: center; padding: 8px 8px 8px 14px; border-bottom: 1px solid var(--line); font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.code .cap button { border: 1px solid var(--line); background: var(--surface); border-radius: 7px; padding: 4px 10px; font-size: 12px; }
+.code pre { margin: 0; padding: 14px; overflow-x: auto; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; }
+details { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+details + details { margin-top: 8px; }
+summary { cursor: pointer; padding: 12px 14px; font-weight: 600; list-style: none; display: flex; gap: 10px; align-items: baseline; }
+summary::-webkit-details-marker { display: none; }
+summary::before { content: "+"; font-family: var(--font-mono); color: var(--warn); width: 12px; }
+details[open] summary::before { content: "–"; }
+details p { padding: 0 14px 14px 36px; color: var(--muted); max-width: 70ch; }
+.pager { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 48px; }
+.pager a { text-decoration: none; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; background: var(--surface); min-width: 0; }
+.pager a:hover { border-color: var(--cyan); }
+.pager small { display: block; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.pager b { font-family: var(--font-display); font-size: 16px; }
+.pager a:last-child { text-align: right; }
+.callout { margin-top: 14px; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--line); border-left: 3px solid var(--warn); background: var(--surface); max-width: 72ch; }
+
+/* ---------- efek futuristik ---------- */
+#bg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+#app { position: relative; z-index: 1; }
+.hero { position: relative; overflow: hidden; }
+.hero::before {
+  content: ""; position: absolute; inset: 0; opacity: 0.75; pointer-events: none;
+  background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: radial-gradient(ellipse 75% 85% at 50% 35%, #000 15%, transparent 78%);
+  mask-image: radial-gradient(ellipse 75% 85% at 50% 35%, #000 15%, transparent 78%);
+  animation: gridmove 14s linear infinite;
+}
+.hero::after {
+  content: ""; position: absolute; width: 540px; height: 540px; right: -140px; top: -170px; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 42%, transparent), transparent 65%);
+  filter: blur(8px); animation: orb 9s ease-in-out infinite alternate;
+}
+.hero .wrap { position: relative; z-index: 1; }
+@keyframes gridmove { to { background-position: 0 44px, 44px 0; } }
+@keyframes orb { to { transform: translate(-70px, 60px) scale(1.18); } }
+@keyframes rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes shine { to { background-position: 200% 0; } }
+@keyframes blink { 50% { opacity: 0.25; } }
+@keyframes sweep { from { top: 0; } to { top: 100%; } }
+@keyframes glowpulse { 50% { box-shadow: 0 0 46px -6px color-mix(in srgb, var(--cyan) 50%, transparent); } }
+@keyframes marquee { to { transform: translateX(-50%); } }
+
+.rise { animation: rise 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: calc(var(--i, 0) * 55ms); }
+.hero .wrap > div:first-child > * { animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.hero .wrap > div:first-child > :nth-child(2) { animation-delay: 0.08s; }
+.hero .wrap > div:first-child > :nth-child(3) { animation-delay: 0.16s; }
+.hero .wrap > div:first-child > :nth-child(4) { animation-delay: 0.24s; }
+.hero .wrap > div:first-child > :nth-child(5) { animation-delay: 0.32s; }
+.stats .stat { animation: rise 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.stats .stat:nth-child(2) { animation-delay: 0.07s; } .stats .stat:nth-child(3) { animation-delay: 0.14s; } .stats .stat:nth-child(4) { animation-delay: 0.21s; }
+.group li { animation: rise 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.group li:nth-child(2) { animation-delay: 0.07s; } .group li:nth-child(3) { animation-delay: 0.14s; } .group li:nth-child(4) { animation-delay: 0.21s; }
+
+.pill b { animation: blink 1.4s ease-in-out infinite; box-shadow: 0 0 10px var(--ok); }
+.hero h1 em {
+  background: linear-gradient(90deg, var(--cyan), #7aa8ff, var(--cyan)); background-size: 200% 100%;
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent;
+  animation: shine 4.5s linear infinite;
+}
+.btn.primary { box-shadow: 0 0 24px -6px var(--accent); }
+.btn.primary:hover { box-shadow: 0 0 34px -2px var(--accent); }
+.dock { position: relative; overflow: hidden; box-shadow: 0 0 26px -10px var(--cyan); animation: rise 0.9s 0.2s both, glowpulse 4.5s 1.2s ease-in-out infinite; }
+.dock::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2px; pointer-events: none; opacity: 0.7;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent); animation: sweep 5.5s linear infinite;
+}
+.card:hover { box-shadow: 0 0 28px -8px var(--g); }
+.stat b { text-shadow: 0 0 20px color-mix(in srgb, var(--cyan) 35%, transparent); }
+
+.chart-box canvas.chart { width: 100%; height: 100px; display: block; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); }
+.chead { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; font-family: var(--font-mono); font-size: 10px; color: var(--muted); margin-bottom: 6px; }
+.chead b { color: var(--fg); font-size: 11px; }
+.chead .px { color: var(--fg); font-size: 13px; font-variant-numeric: tabular-nums; }
+.chead .chg { font-variant-numeric: tabular-nums; }
+.chead em { font-style: normal; margin-left: auto; opacity: 0.8; }
+.up { color: var(--ok); } .down { color: var(--danger); }
+.panel { margin-top: 20px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); padding: 14px 16px; }
+.panel .chead { font-size: 12px; margin-bottom: 10px; }
+.panel .chead b { font-size: 13px; }
+.panel .chead .px { font-size: 22px; font-family: var(--font-display); font-weight: 600; }
+.panel canvas.chart { height: 200px; }
+
+.ticker { border-block: 1px solid var(--line); overflow: hidden; background: var(--surface); }
+.ticker .track { display: flex; width: max-content; animation: marquee 60s linear infinite; }
+.ticker .track:hover { animation-play-state: paused; }
+.ticker span { white-space: nowrap; padding: 10px 22px; font-family: var(--font-mono); font-size: 12px; color: var(--muted); border-right: 1px solid var(--line); }
+.ticker b { color: var(--fg); font-weight: 600; margin-right: 10px; }
+.ticker em { font-style: normal; font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* ---------- responsive ---------- */
+@media (max-width: 940px) {
+  .hero .wrap { grid-template-columns: minmax(0, 1fr); }
+  .groups { grid-template-columns: minmax(0, 1fr); }
+  .quick { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .quick li:nth-child(2) { border-right: 0; }
+  .quick li:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+  .shell { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .side { position: static; max-height: none; display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; }
+  .side h4 { display: none; }
+  .side a { white-space: nowrap; border: 1px solid var(--line); }
+  .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .cards { grid-template-columns: minmax(0, 1fr); }
+  .dock { grid-template-columns: minmax(0, 1fr); }
+  .dock .win:not(.mid) { display: none; }
+  .quick { grid-template-columns: minmax(0, 1fr); }
+  .quick li { border-right: 0; border-bottom: 1px solid var(--line); }
+  .quick li:last-child { border-bottom: 0; }
+  .top nav a:not([data-keep]) { display: none; }
+  .pager { grid-template-columns: minmax(0, 1fr); }
+  .pager a:last-child { text-align: left; }
+  .search input { width: 100%; }
+  .search { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .disc { animation: none; }
+  html { scroll-behavior: auto; }
+  .card { transition: none; }
+}
+</style>
+
+
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#home" data-route="home"><i>X</i>Xyurei Offc</a>
+    <nav aria-label="Menu utama">
+      <a href="#home" data-route="home" data-nav="home">Beranda</a>
+      <a href="#persiapan" data-route="persiapan" data-nav="persiapan">Persiapan</a>
+      <a href="#dashboard" data-route="dashboard" data-nav="dashboard" data-keep>Dashboard</a>
+      <button class="theme" id="themeBtn" type="button" aria-label="Ganti tema" data-keep>Tema</button>
+    </nav>
+  </div>
+</header>
+
+<canvas id="bg" aria-hidden="true"></canvas>
+<div id="app"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------------- DATA ---------------- */
+  var GROUPS = {
+    import: { label: "Import file", cls: "g-import" },
+    upload: { label: "Upload ke Roblox", cls: "g-upload" },
+    tools: { label: "Tools", cls: "g-tools" }
+  };
+
+  var APIKEY_LINK = '<a href="#apikey" data-route="apikey">Setup API Upload</a>';
+
+  var F = [
+    {
+      id: "rbxm", name: "Import RBXM", glyph: "M", group: "import",
+      desc: "Model binary (.rbxm) dari folder workspace masuk ke game.",
+      lead: "Pilih file model .rbxm dari folder workspace executor, tekan IMPORT, dan modelnya muncul di Workspace lengkap dengan script di dalamnya.",
+      meta: [["Format", ".rbxm"], ["Tujuan", "Workspace"]],
+      needs: ["File <code>.rbxm</code> di folder workspace executor (mis. <code>Delta/workspace</code>)", "Executor dengan <code>readfile</code>, <code>listfiles</code> dan <code>getcustomasset</code>", "File berasal dari ekspor Model, bukan Place"],
+      steps: [
+        ["Taruh file di workspace", "Salin file <code>.rbxm</code> ke folder workspace executor. Subfolder sampai 4 tingkat ikut terbaca."],
+        ["Buka jendela Import RBXM", "Di dashboard klik kartu Import RBXM. Jendelanya muncul di samping dashboard."],
+        ["Scan file", "Scan berjalan otomatis saat GUI dibuka. Kalau kamu baru menambah file, tekan <span class='btnchip'>SCAN</span>. Kolom cari menyaring berdasarkan nama atau path."],
+        ["Tekan IMPORT", "Tombol berubah menjadi IMPORTING. Progress bar di footer menunjukkan tahapan baca, parse, dan build."],
+        ["Selesai", "Tombol berubah menjadi DONE dan model ada di Workspace. Status bar menampilkan jumlah objek, jumlah script, dan hasil pemulihan source."]
+      ],
+      buttons: [["SCAN", "Cari ulang file di folder workspace."], ["IMPORT", "Mulai import file pada kartu itu."], ["DONE", "Sudah masuk. Tekan lagi hanya menampilkan status."]],
+      notes: ["Semua BasePart otomatis di-Anchored supaya model tidak runtuh atau jatuh.", "Script di dalam model dibaca source-nya dan disimpan, jadi tetap bisa dilihat.", "Mesh, tekstur, dan asset lain di-preload di latar belakang setelah import."],
+      trouble: [["RBXM LOAD ERROR", "Executor tidak bisa memuat file lewat <code>getcustomasset</code> atau <code>game:GetObjects</code>. Simpan ulang modelnya sebagai <code>.rbxmx</code> lalu import lewat Import RBXMX."], ["File bukan RBXM yang valid", "Pastikan kamu mengekspor Model. File Place harus lewat Import RBXL."], ["Daftar kosong", "Cek apakah file benar-benar ada di folder workspace, lalu tekan SCAN."]]
+    },
+    {
+      id: "rbxl", name: "Import RBXL", glyph: "L", group: "import",
+      desc: "Place binary (.rbxl) dibangun ulang dan diaktifkan otomatis.",
+      lead: "Import seluruh place: Workspace, Lighting, StarterGui, ReplicatedStorage dan service lain dibangun ulang, lalu script diaktifkan.",
+      meta: [["Format", ".rbxl"], ["Tujuan", "Semua service"]],
+      needs: ["File <code>.rbxl</code> di folder workspace executor", "Executor dengan <code>string.unpack</code> dan <code>bit32</code>", "File Zstd perlu <code>EncodingService</code> atau JSON bridge. Kalau gagal, pakai RBXLX"],
+      steps: [
+        ["Taruh file di workspace", "Salin <code>.rbxl</code> ke folder workspace executor."],
+        ["Buka Import RBXL", "Klik kartu Import RBXL di dashboard."],
+        ["Tekan IMPORT", "Tahap pertama membaca dan memparse file. Instance dibangun dulu di folder penampung (staging), dan script dimatikan selama proses."],
+        ["Tunggu ACTIVATING", "Setelah build selesai, tombol otomatis berubah ke ACTIVATING. Isi staging dipindah ke service yang sesuai, lalu script dihidupkan sesuai status aslinya."],
+        ["ACTIVE", "Tombol berubah ACTIVE dan muncul notifikasi. Kalau auto-activate gagal, tombol berhenti di ACTIVATE. Tekan sekali lagi."]
+      ],
+      buttons: [["IMPORT", "Mulai import."], ["ACTIVATE", "Muncul bila aktivasi otomatis gagal. Ulangi aktivasi."], ["ACTIVE", "Place sudah diterapkan."]],
+      notes: ["LocalScript di StarterGui, StarterPlayerScripts, StarterCharacterScripts dan StarterPack disalin ke PlayerGui, PlayerScripts, karakter, dan Backpack, lalu dijalankan.", "Kalau source tidak bisa ditulis ke script, LocalScript dijalankan lewat runtime bridge dengan <code>loadstring</code>.", "Semua BasePart di-Anchored. Hasil import ada di sisi client kamu.", "File besar butuh waktu. Pantau persen progress di footer."],
+      trouble: [["COMPAT: string.unpack / bit32 tidak ada", "Executor terlalu lama untuk membaca format binary. Pakai file <code>.rbxlx</code>."], ["ZSTD decompressor tidak tersedia", "File dikompres Zstd. Simpan ulang place sebagai <code>.rbxlx</code> dari Studio dan import lewat Import RBXLX."], ["PARSE ERROR", "File rusak atau bukan place. Coba ekspor ulang dari Studio."]]
+    },
+    {
+      id: "rbxlx", name: "Import RBXLX", glyph: "LX", group: "import",
+      desc: "Place XML (.rbxlx), paling kompatibel antar executor.",
+      lead: "Sama seperti Import RBXL, tetapi untuk place berformat XML. Tidak butuh dekompresi, jadi jalan di executor yang tidak mendukung binary.",
+      meta: [["Format", ".rbxlx"], ["Tujuan", "Semua service"]],
+      needs: ["File <code>.rbxlx</code> di folder workspace executor", "Executor dengan <code>readfile</code> dan <code>listfiles</code>"],
+      steps: [
+        ["Ekspor dari Studio", "Di Roblox Studio simpan place dengan <b>Save to File As</b> dan pilih format <code>.rbxlx</code>."],
+        ["Taruh di workspace", "Salin file ke folder workspace executor."],
+        ["Buka Import RBXLX dan tekan IMPORT", "Script mendeteksi format XML otomatis, memparse isinya, lalu membangun semua instance."],
+        ["Tunggu sampai ACTIVE", "Alurnya sama dengan RBXL: build ke staging, pindah ke service, aktivasi script."]
+      ],
+      buttons: [["SCAN", "Cari file .rbxlx."], ["IMPORT", "Mulai import dan aktivasi."]],
+      notes: ["File XML jauh lebih besar dan lebih lambat diparse daripada binary.", "Tipe properti yang tidak dikenali parser dilewati. Jumlahnya tampil sebagai <code>prop:</code> di status bar."],
+      trouble: [["XML PARSER CRASH / PARSE ERROR", "File terpotong atau bukan Roblox XML. Ekspor ulang dan pastikan ekstensinya <code>.rbxlx</code>."], ["Beberapa objek hilang", "Class yang tidak bisa dibuat client dilewati. Jumlah yang dilewati ada di status."]]
+    },
+    {
+      id: "rbxmx", name: "Import RBXMX", glyph: "MX", group: "import",
+      desc: "Model XML (.rbxmx) tanpa butuh getcustomasset.",
+      lead: "Import model berformat XML. Isinya dibangun langsung oleh parser bawaan, jadi tetap jalan di executor yang tidak punya <code>getcustomasset</code>.",
+      meta: [["Format", ".rbxmx"], ["Tujuan", "Workspace"]],
+      needs: ["File <code>.rbxmx</code> di folder workspace executor", "Executor dengan <code>readfile</code> dan <code>listfiles</code>"],
+      steps: [
+        ["Ekspor model dari Studio", "Klik kanan model, <b>Save to File</b>, lalu pilih format <code>.rbxmx</code>."],
+        ["Taruh di workspace", "Salin file ke folder workspace executor."],
+        ["Buka Import RBXMX dan tekan IMPORT", "Parser membangun instance, menyambungkan referensi antar objek, dan memasang script."],
+        ["Cek hasilnya", "Status bar menampilkan jumlah objek, objek yang dilewati, dan properti yang gagal."]
+      ],
+      buttons: [["SCAN", "Cari file .rbxmx."], ["IMPORT", "Import model ke Workspace."]],
+      notes: ["Semua BasePart otomatis di-Anchored.", "MeshPart dibuat dengan mesh visual agar cepat. Part yang memakai WrapLayer atau WrapTarget dibuat sebagai MeshPart asli."],
+      trouble: [["RBXMX PARSE ERROR", "File bukan Roblox XML yang utuh. Ekspor ulang dari Studio."], ["Mesh tidak tampil", "Asset mesh harus bisa dimuat game. Mesh private tidak akan muncul."]]
+    },
+    {
+      id: "bypass", name: "Bypass Music", glyph: "BP", group: "upload",
+      desc: "Upload mp3/ogg/wav, atur volume, pitch, speed, lalu ambil ID.",
+      lead: "Upload file audio dari workspace ke akun Roblox kamu lewat Open Cloud. Volume dan speed untuk WAV bisa langsung dibakar ke file.",
+      meta: [["Format", ".mp3 .ogg .wav"], ["Maks", "20 MB"], ["Butuh", "API Key + User ID"]],
+      needs: ["API Key Open Cloud dan User ID. Lihat " + APIKEY_LINK, "Executor dengan <code>request</code>, <code>readfile</code> dan <code>listfiles</code>", "<code>getcustomasset</code> untuk fitur PREVIEW"],
+      steps: [
+        ["Atur API sekali saja", "Buka Bypass Music, tekan ikon ⚙, isi API Key dan User ID, tekan VALIDASI, lalu SIMPAN. Data tersimpan di <code>xyurei_music/bypass_cfg.json</code>."],
+        ["Taruh file audio di workspace", "Salin file audio ke folder workspace, lalu tekan SCAN. Daftar menampilkan file beserta ekstensinya."],
+        ["Pilih lagu", "Klik kartu lagu. Halaman editor terbuka dengan tiga slider: VOLUME, PITCH, SPEED."],
+        ["Atur dan dengarkan", "Geser slider, tekan <span class='btnchip'>▶ PREVIEW</span> untuk mendengar hasilnya. RESET mengembalikan nilai awal."],
+        ["Upload", "Tekan UPLOAD TO ROBLOX. Tombol berganti MEMPROSES, UPLOADING, lalu MENUNGGU ROBLOX."],
+        ["Ambil ID", "Setelah BERHASIL, tekan SALIN ID atau SALIN KODE SOUND untuk menempel kode Sound siap pakai."]
+      ],
+      buttons: [["⚙", "Pengaturan API Key dan User ID."], ["VALIDASI", "Cek User ID dan API Key ke server Roblox."], ["SIMPAN", "Aktif setelah validasi sukses."], ["▶ PREVIEW", "Putar lokal dengan efek yang sedang diatur."], ["UPLOAD TO ROBLOX", "Kirim file ke Roblox."], ["SALIN KODE SOUND", "Salin kode Instance Sound lengkap dengan volume, speed, dan pitch."]],
+      notes: ["WAV 16-bit: volume dan speed diproses ke dalam file yang diupload.", "mp3 dan ogg diupload apa adanya. Pitch dan setelan lain disediakan sebagai kode Sound.", "Audio bisa menunggu moderasi Roblox sebelum bisa diputar.", "Kalau RELAY_URL di XYUREI_CONFIG terisi, file dikirim per potongan 1 MB lewat website relay, lalu relay yang mengupload."],
+      trouble: [["HTTP 401", "API Key salah atau kedaluwarsa. Buat key baru dan validasi ulang."], ["HTTP 403", "Izin Assets Read + Write belum ada, key dibatasi IP, atau User ID bukan pemilik key."], ["HTTP 429", "Batas upload atau rate limit tercapai. Tunggu lalu coba lagi."], ["FileContent field is required", "Executor merusak data biner. Buka ⚙ lalu tekan TES BINARY EXECUTOR dan TES MULTIPART. Jika gagal, pakai website relay."]]
+    },
+    {
+      id: "image", name: "Upload Image", glyph: "IM", group: "upload",
+      desc: "Upload gambar png/jpg/bmp/tga sebagai Decal.",
+      lead: "Ubah file gambar di workspace menjadi asset Roblox. Hasilnya Decal ID yang bisa dipakai di ImageLabel atau Decal.",
+      meta: [["Format", ".png .jpg .bmp .tga"], ["Jenis asset", "Decal"], ["Butuh", "API Key + User ID"]],
+      needs: ["API Key Open Cloud dan User ID. Lihat " + APIKEY_LINK + ". Pengaturan dipakai bersama Bypass Music", "Executor dengan <code>request</code>, <code>readfile</code> dan <code>listfiles</code>"],
+      steps: [
+        ["Atur API (kalau belum)", "Tekan ⚙ di jendela ini, isi API Key dan User ID, VALIDASI, SIMPAN. Kalau sudah diisi di Bypass Music, langkah ini dilewati."],
+        ["Taruh gambar di workspace", "Salin file gambar lalu tekan SCAN."],
+        ["Pilih file", "Klik kartu gambar. Preview tampil untuk png dan jpg."],
+        ["Beri nama asset", "Nama otomatis diambil dari nama file dan boleh diganti, maksimal 50 karakter."],
+        ["UPLOAD TO ROBLOX", "Tunggu sampai muncul BERHASIL beserta ID."],
+        ["Pakai ID-nya", "SALIN ID atau SALIN KODE untuk kode ImageLabel yang siap ditempel. Riwayat upload tersimpan di <code>xyurei_image/history.json</code>."]
+      ],
+      buttons: [["SCAN", "Cari gambar di workspace."], ["⚙", "API Key dan User ID."], ["SALIN ID", "Salin Asset ID."], ["SALIN KODE", "Salin kode ImageLabel."]],
+      notes: ["Gambar bisa menunggu moderasi sebentar.", "Batas ukuran file 20 MB."],
+      trouble: [["HTTP 400 file biner tidak terbaca", "Executor merusak data biner. Pakai website relay atau jalankan TES BINARY EXECUTOR di Bypass Music."], ["Preview gagal dimuat", "Hanya memengaruhi tampilan. File tetap bisa diupload."]]
+    },
+    {
+      id: "animasi", name: "Upload Animasi", glyph: "AN", group: "upload",
+      desc: "Upload animasi .rbxm/.rbxmx berisi KeyframeSequence.",
+      lead: "Upload animasi hasil ekspor Animation Editor sebagai asset Animation, lalu ambil ID untuk dimainkan lewat Humanoid.",
+      meta: [["Format", ".rbxm .rbxmx"], ["Jenis asset", "Animation"], ["Butuh", "API Key + User ID"]],
+      needs: ["File <code>.rbxm</code> atau <code>.rbxmx</code> berisi KeyframeSequence", "API Key Open Cloud dan User ID. Lihat " + APIKEY_LINK],
+      steps: [
+        ["Ekspor dari Animation Editor", "Di Studio, ekspor animasi sebagai KeyframeSequence lalu simpan sebagai file model."],
+        ["Taruh di workspace dan SCAN", "Salin file ke folder workspace executor, lalu tekan SCAN."],
+        ["Pilih file dan cek nama", "Klik kartu file. Nama asset boleh diganti."],
+        ["UPLOAD TO ROBLOX", "Tunggu BERHASIL. Riwayat tersimpan di <code>xyurei_anim/history.json</code>."],
+        ["Mainkan", "SALIN KODE menghasilkan kode Animation yang dimainkan lewat Humanoid."]
+      ],
+      buttons: [["SALIN ID", "Salin Asset ID animasi."], ["SALIN KODE", "Salin kode Animation + LoadAnimation."]],
+      notes: ["Animasi hanya bisa dimainkan di game milik akun atau grup yang mengupload."],
+      trouble: [["Upload ditolak", "Cek isi file. Hanya KeyframeSequence yang diterima sebagai animasi."], ["Animasi tidak jalan di game lain", "Itu batasan Roblox. Asset harus dimiliki pemilik game."]]
+    },
+    {
+      id: "uploadrbxm", name: "Upload RBXM", glyph: "UP", group: "upload",
+      desc: "Upload model .rbxm/.rbxmx jadi Asset ID.",
+      lead: "Ubah file model di workspace menjadi asset Model di akun kamu, lalu muat kembali lewat InsertService.",
+      meta: [["Format", ".rbxm .rbxmx"], ["Jenis asset", "Model"], ["Butuh", "API Key + User ID"]],
+      needs: ["File model <code>.rbxm</code> atau <code>.rbxmx</code> (Model, bukan Place)", "API Key Open Cloud dan User ID. Lihat " + APIKEY_LINK],
+      steps: [
+        ["Taruh model di workspace", "Salin file model lalu tekan SCAN di jendela Upload RBXM."],
+        ["Pilih file dan cek nama", "Klik kartu file, ganti nama asset kalau perlu."],
+        ["UPLOAD TO ROBLOX", "Tunggu sampai BERHASIL. Riwayat tersimpan di <code>xyurei_model/history.json</code>."],
+        ["Muat modelnya", "SALIN KODE menghasilkan kode <code>InsertService:LoadAsset</code> untuk memasukkan model."]
+      ],
+      buttons: [["SALIN ID", "Salin Asset ID."], ["SALIN KODE", "Salin kode LoadAsset."]],
+      notes: ["Asset ID bisa dipakai di game milik akun atau grup yang mengupload."],
+      trouble: [["Ditolak 403", "Izin Assets Read + Write belum ada atau User ID bukan pemilik key."], ["Timeout menunggu Roblox", "Cek hasilnya di Creator Hub, bagian Creations."]]
+    },
+    {
+      id: "toolbox", name: "Toolbox", glyph: "TB", group: "tools",
+      desc: "Cari dan import Model, Mesh, Decal, Audio dari katalog.",
+      lead: "Cari asset di katalog Roblox atau tempel ID langsung, lalu masukkan ke game dalam satu klik.",
+      meta: [["Kategori", "Model · Mesh · Decal · Audio"], ["Hasil", "30 per halaman"]],
+      needs: ["Executor dengan <code>request</code>", "Koneksi internet"],
+      steps: [
+        ["Buka Toolbox", "Klik kartu Toolbox di dashboard. Jendela muncul di samping dashboard."],
+        ["Pilih kategori", "Tekan salah satu chip: MODEL, MESH, DECAL, atau AUDIO."],
+        ["Cari", "Ketik kata kunci lalu tekan CARI atau Enter. Kalau yang diketik hanya angka, script mengambil asset dengan ID itu."],
+        ["Import", "Tekan IMPORT pada kartu. Objek muncul sekitar 10 stud di depan karakter."],
+        ["Muat lebih banyak", "Kalau hasil penuh 30, tombol MUAT LEBIH BANYAK muncul di bawah daftar."]
+      ],
+      buttons: [["CARI", "Jalankan pencarian."], ["SALIN", "Salin ID asset."], ["▶", "Khusus Audio: putar atau stop preview."], ["IMPORT", "Masukkan ke game."]],
+      notes: ["Model dimuat lewat <code>game:GetObjects</code>, dengan <code>InsertService:LoadAsset</code> sebagai cadangan.", "Mesh menjadi Part dengan SpecialMesh. Decal dipasang pada Part di sisi depan. Audio dibuat sebagai Sound dan langsung diputar.", "Objek hasil import diberi atribut <code>XYUREI_Toolbox</code>."],
+      trouble: [["PENCARIAN GAGAL", "Executor tidak punya <code>request</code> atau koneksi bermasalah. Pesan error ada di daftar dan status bar."], ["gagal memuat model", "Model private atau tidak bisa dimuat client. Coba ID lain."], ["SALIN menampilkan ID", "Executor tidak punya fungsi clipboard. Salin ID dari tombol secara manual."]]
+    },
+    {
+      id: "music", name: "Music Player", glyph: "MP", group: "tools",
+      desc: "Putar lagu pakai ID audio Roblox, 20 lagu bawaan.",
+      lead: "Pemutar musik dengan kaset yang berputar, daftar lagu, dan kolom untuk menambah lagu sendiri lewat ID audio.",
+      meta: [["Bawaan", "20 lagu"], ["Simpan", "xyurei_music/"]],
+      needs: ["Audio Roblox yang bisa diakses game", "<code>writefile</code> (opsional) untuk menyimpan lagu tambahan"],
+      steps: [
+        ["Buka Music Player", "Klik kartu Music Player di dashboard atau tombol Buka Music di Quick Access."],
+        ["Putar lagu", "Tekan PUTAR pada kartu lagu. Status berubah MEMUAT lalu MEMUTAR."],
+        ["Kontrol pemutar", "Pakai ▶/II untuk jeda, ■ untuk berhenti, » untuk lagu berikutnya, dan LOOP untuk mengulang. Bar progres bisa diketuk untuk loncat posisi."],
+        ["Tambah lagu sendiri", "Tempel ID audio di kolom ID, isi nama kalau mau, lalu tekan + TAMBAH atau Enter."],
+        ["Hapus lagu tambahan", "Lagu yang kamu tambahkan punya tombol ✕ di kartunya."]
+      ],
+      buttons: [["PUTAR", "Putar lagu pada kartu itu."], ["▶ / II", "Mulai atau jeda."], ["■", "Berhenti dan kembali ke awal."], ["»", "Lagu berikutnya."], ["LOOP", "Ulangi lagu yang sedang diputar."], ["+ TAMBAH", "Masukkan ID audio ke daftar."]],
+      notes: ["Script memeriksa bahwa ID adalah asset audio dan mengambil nama serta pembuatnya otomatis.", "Lagu tambahan disimpan di <code>xyurei_music/playlist_user.json</code> bila executor punya <code>writefile</code>.", "Lagu berikutnya otomatis diputar saat lagu selesai, kecuali LOOP aktif."],
+      trouble: [["gagal dimuat (ID salah / audio private)", "Audio harus publik atau dimiliki akun yang bisa memutarnya di game ini."], ["ID BUKAN AUDIO", "ID yang ditempel adalah jenis asset lain."], ["LAGU SUDAH ADA DI LIST", "ID itu sudah ada. Pakai ID lain."]]
+    },
+    {
+      id: "aichat", name: "AI Chat", glyph: "AI", group: "tools",
+      desc: "Ngobrol dengan AI lewat OpenRouter di dalam GUI.",
+      lead: "Tanya soal Lua, script Roblox, atau hal lain tanpa keluar dari game. Jawaban diformat ringan dan bisa disalin.",
+      meta: [["Layanan", "OpenRouter"], ["Riwayat", "12 pesan terakhir"], ["Butuh", "API Key OpenRouter"]],
+      needs: ["API Key OpenRouter dari <code>openrouter.ai/keys</code>", "Executor dengan <code>request</code>", "Saldo atau kuota akun OpenRouter"],
+      steps: [
+        ["Isi API Key sebelum menjalankan script", "Tambahkan baris di bawah di atas script utama. Cara ini tidak perlu mengedit file."],
+        ["Buka AI Chat", "Klik kartu AI Chat di dashboard."],
+        ["Tulis pesan", "Ketik pertanyaan lalu tekan KIRIM atau Enter. Balasan muncul sebagai gelembung."],
+        ["Salin jawaban", "SALIN menyalin jawaban AI terakhir. HAPUS mengosongkan percakapan."]
+      ],
+      code: ["Isi sebelum menjalankan script", 'getgenv().XYUREI_OPENROUTER_KEY = "sk-or-xxxxxxxx"\n-- opsional, ganti model:\ngetgenv().XYUREI_OPENROUTER_MODEL = "openai/gpt-4o-mini"'],
+      buttons: [["KIRIM", "Kirim pesan ke AI."], ["SALIN", "Salin jawaban terakhir."], ["HAPUS", "Reset percakapan."]],
+      notes: ["Jangan membagikan API Key atau skrip yang sudah berisi key kamu.", "Hanya 12 pesan terakhir yang dikirim sebagai konteks."],
+      trouble: [["API key belum diisi", "Pastikan baris <code>getgenv()</code> dijalankan sebelum GUI dibuka."], ["401: API key salah", "Key tidak valid. Buat ulang di OpenRouter."], ["402: saldo tidak cukup", "Isi saldo OpenRouter atau pilih model gratis."], ["429: rate limit", "Tunggu sebentar lalu kirim lagi."]]
+    },
+    {
+      id: "image3d", name: "Image to 3D", glyph: "3D", group: "tools",
+      desc: "Gambar ID atau file jadi model part berwarna.",
+      lead: "Ubah gambar jadi model dari ribuan Part berwarna, otomatis Anchored dan muncul di depan karaktermu.",
+      meta: [["Input", "PNG · JPG"], ["Maks", "20.000 part"], ["Simpan", "xyurei_img3d/"]],
+      needs: ["Gambar PNG (non-interlaced) atau JPG baseline", "Untuk Image ID: executor dengan <code>request</code> atau <code>game:HttpGet</code>"],
+      steps: [
+        ["Isi sumber gambar", "Tempel Image ID atau nama file, lalu tekan LOAD. Atau pilih file dari daftar workspace dan tekan SCAN bila perlu."],
+        ["Cek preview dan info", "Preview menampilkan format, ukuran, dan ukuran file. Gambar dari ID disimpan di <code>xyurei_img3d/</code>."],
+        ["Atur pengaturan", "DETAIL (8 sampai 256 px), LEBAR (stud), TEBAL (stud), dan WARNA (2 sampai 256 level)."],
+        ["Pilih hapus background", "Tombol HAPUS BG ON membuang warna latar yang menyentuh tepi gambar."],
+        ["Tekan IMAGE TO MODEL", "Progress bar berjalan. Model muncul di depan karakter dengan semua part Anchored."],
+        ["Bersihkan", "HAPUS HASIL menghapus model. STOP menghentikan proses yang sedang berjalan."]
+      ],
+      buttons: [["LOAD", "Ambil gambar dari ID atau file."], ["SCAN", "Cari png/jpg di workspace."], ["HAPUS BG", "Aktif atau matikan penghapusan latar."], ["IMAGE TO MODEL", "Buat model."], ["HAPUS HASIL", "Hapus model terakhir."], ["STOP", "Hentikan proses."]],
+      notes: ["Part bersebelahan yang berwarna sama digabung jadi satu blok supaya jumlah part lebih sedikit.", "Kalau jumlah part melebihi 20.000, turunkan DETAIL atau WARNA.", "WebP, GIF, dan BMP belum bisa didecode. PNG interlaced dan JPEG progressive juga belum didukung.", "Model hanya terlihat di sisi kamu (client)."],
+      trouble: [["Gagal mengunduh ID", "ID harus berupa Image atau Decal publik. Bukan audio atau model. Cadangannya, taruh file di workspace."], ["Terlalu banyak part", "Turunkan DETAIL dan WARNA lalu coba lagi."], ["Gagal decode", "Simpan ulang gambar sebagai PNG biasa atau JPG baseline."]]
+    }
+  ];
+  var BYID = {};
+  F.forEach(function (f) { BYID[f.id] = f; });
+
+  /* urutan sidebar */
+  var ORDER = ["rbxm", "rbxl", "rbxlx", "rbxmx", "bypass", "image", "animasi", "uploadrbxm", "toolbox", "music", "aichat", "image3d"];
+
+  var REQS = [
+    ["listfiles, readfile", "Scan dan baca file di workspace", "Import RBXM/RBXL/RBXLX/RBXMX, semua Upload, Image to 3D"],
+    ["request", "Permintaan HTTP", "Toolbox, AI Chat, semua Upload, Image to 3D dari ID"],
+    ["getcustomasset", "Memuat file lokal sebagai asset", "Import RBXM, preview audio dan gambar"],
+    ["string.unpack, bit32", "Membaca format binary", "Import RBXL dan RBXM"],
+    ["loadstring", "Menjalankan LocalScript lewat runtime bridge", "Import RBXL (aktivasi script)"],
+    ["writefile, makefolder, isfile", "Menyimpan pengaturan dan lagu tambahan", "Music, API Upload, Image to 3D"],
+    ["setclipboard", "Menyalin ID dan kode", "Toolbox, Upload, AI Chat"]
+  ];
+
+  /* ---------------- HELPERS ---------------- */
+  var app = document.getElementById("app");
+  function esc(s) { return String(s).replace(/[&<>]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]; }); }
+  function gcls(f) { return GROUPS[f.group].cls; }
+
+  function sideNav(active) {
+    var out = '<aside class="side" aria-label="Navigasi dokumentasi">';
+    out += '<h4>Mulai</h4>';
+    out += link("dashboard", "Dashboard", "D", "", active);
+    out += link("persiapan", "Persiapan", "P", "", active);
+    out += link("apikey", "Setup API Upload", "K", "", active);
+    Object.keys(GROUPS).forEach(function (g) {
+      out += "<h4>" + GROUPS[g].label + "</h4>";
+      ORDER.forEach(function (id) {
+        var f = BYID[id];
+        if (f.group === g) out += link(f.id, f.name, f.glyph, GROUPS[g].cls, active);
+      });
+    });
+    return out + "</aside>";
+  }
+  function link(id, name, glyph, cls, active) {
+    return '<a href="#' + id + '" data-route="' + id + '" class="' + cls + '"' + (active === id ? ' aria-current="page"' : "") + "><i>" + glyph + "</i>" + name + "</a>";
+  }
+
+  /* ---------------- VIEWS ---------------- */
+  function viewHome() {
+    var out = '<main><section class="hero"><div class="wrap">';
+    out += '<div><span class="pill"><b></b>Public beta · build v26</span>';
+    out += '<h1>Import map dalam <em>hitungan detik</em>, bukan jam.</h1>';
+    out += '<p class="lead">GUI untuk executor Roblox: import RBXL, RBXLX, RBXM dan RBXMX, ditambah toolbox, music player, AI chat, upload asset, dan Image to 3D.</p>';
+    out += '<div class="cta"><a class="btn primary" href="#dashboard" data-route="dashboard">Buka Dashboard</a><a class="btn" href="#persiapan" data-route="persiapan">Baca Persiapan</a></div>';
+    out += '<div class="facts"><span>12 fitur</span><span>4 format import</span><span>20 lagu bawaan</span></div></div>';
+    out += '<div class="dock" aria-hidden="true">';
+    out += '<div class="win"><div class="bar"><i></i>MUSIC</div><div class="disc"></div><div class="ph m"></div><div class="ph s"></div><div class="row"><i></i><div class="ph"></div></div></div>';
+    out += '<div class="win mid"><div class="bar"><i></i>DASHBOARD</div><div class="minis"><div class="mini"><small>TOTAL FITUR</small><b>12</b></div><div class="mini"><small>KATEGORI</small><b>3</b></div><div class="mini"><small>FORMAT</small><b>4</b></div><div class="mini"><small>LAGU</small><b>20</b></div></div>';
+    out += '<div class="chart-box"><div class="chead"><b>XYR/BLU</b><span class="px"></span><span class="chg"></span><em>simulasi</em></div><canvas class="chart" data-kind="line"></canvas></div></div>';
+    out += '<div class="win"><div class="bar"><i></i>TOOLBOX</div><div class="chips"><span class="on">MODEL</span><span>MESH</span><span>DECAL</span><span>AUDIO</span></div><div class="row"><i></i><div class="ph"></div></div><div class="row"><i></i><div class="ph m"></div></div><div class="row"><i></i><div class="ph s"></div></div></div>';
+    out += '</div></div></section>';
+    out += tickerHtml();
+
+    out += '<section class="section"><div class="wrap"><h2>Semua yang ada di GUI</h2><p class="sub">Klik fitur mana pun untuk membuka panduan langkah demi langkah.</p><div class="groups">';
+    Object.keys(GROUPS).forEach(function (g) {
+      out += '<div class="group ' + GROUPS[g].cls + '"><h3>' + GROUPS[g].label + "</h3><ul>";
+      ORDER.forEach(function (id) {
+        var f = BYID[id];
+        if (f.group === g) out += '<li><a href="#' + f.id + '" data-route="' + f.id + '"><b>' + f.name + "</b><span>" + f.desc + "</span></a></li>";
+      });
+      out += "</ul></div>";
+    });
+    out += "</div></div></section>";
+
+    out += '<section class="section"><div class="wrap"><h2>Mulai dalam empat langkah</h2><p class="sub">Dock bekerja sendiri: jendela fitur keluar di kiri dan kanan dashboard, dan semuanya bisa digeser serta diubah ukurannya.</p>';
+    out += '<ol class="quick" style="padding:0"><li><b>Siapkan executor</b><span>Pastikan fungsi file dan HTTP tersedia.</span></li><li><b>Taruh file</b><span>Salin .rbxl, .rbxm, audio, atau gambar ke folder workspace.</span></li><li><b>Jalankan script</b><span>Jalankan xyurei_new_gui_v26.lua lalu tekan Mulai Import.</span></li><li><b>Pakai fitur</b><span>Klik kartu di dashboard dan ikuti panduannya.</span></li></ol></div></section></main>';
+    out += '<footer class="foot"><div class="wrap"><span>Xyurei Offc · dibuat oleh XYUREI X VYZEN DOMINION</span><span>Panduan ini mengikuti build v26.</span></div></footer>';
+    return out;
+  }
+
+  function viewDashboard() {
+    var out = '<div class="wrap"><div class="shell">' + sideNav("dashboard") + '<main class="main">';
+    out += '<div class="page-title"><div><h1>Dashboard</h1><p>Pilih fitur untuk membuka panduan cara pakainya.</p></div>';
+    out += '<label class="search"><span hidden>Cari fitur</span><input id="q" type="search" placeholder="Cari fitur..." autocomplete="off"></label></div>';
+    out += '<div class="stats"><div class="stat"><small>FITUR</small><b>12</b><span>Import, upload, tools</span></div><div class="stat"><small>FORMAT IMPORT</small><b>4</b><span>RBXL RBXLX RBXM RBXMX</span></div><div class="stat"><small>LAGU BAWAAN</small><b>20</b><span>Music Player</span></div><div class="stat"><small>KATEGORI TOOLBOX</small><b>4</b><span>Model Mesh Decal Audio</span></div></div>';
+    out += '<section class="panel chart-box" aria-label="Grafik simulasi"><div class="chead"><b>XYR/BLU</b><span class="px"></span><span class="chg"></span><em>Grafik simulasi, hanya hiasan</em></div><canvas class="chart" data-kind="candle"></canvas></section>';
+    out += '<div class="filters" role="group" aria-label="Filter grup"><button type="button" data-f="all" aria-pressed="true">Semua</button>';
+    Object.keys(GROUPS).forEach(function (g) { out += '<button type="button" data-f="' + g + '" aria-pressed="false">' + GROUPS[g].label + "</button>"; });
+    out += "</div>";
+    out += '<div class="cards" id="cards">';
+    ORDER.forEach(function (id) {
+      var f = BYID[id];
+      out += '<a class="card rise ' + gcls(f) + '" style="--i:' + ORDER.indexOf(id) + '" href="#' + f.id + '" data-route="' + f.id + '" data-g="' + f.group + '" data-hay="' + esc((f.name + " " + f.desc + " " + f.meta.map(function (m) { return m[1]; }).join(" ")).toLowerCase()) + '"><span class="ic">' + f.glyph + "</span><b>" + f.name + "</b><p>" + f.desc + '</p><span class="go">Lihat panduan →</span></a>';
+    });
+    out += '</div><p class="empty" id="none" hidden>Tidak ada fitur yang cocok.</p>';
+    out += '<section class="block"><h2>Format yang didukung</h2><div class="table-wrap"><table><thead><tr><th>Ekstensi</th><th>Jenis</th><th>Fitur</th></tr></thead><tbody>';
+    out += "<tr><td><code>.rbxl</code></td><td>Place binary</td><td><a href='#rbxl' data-route='rbxl'>Import RBXL</a></td></tr>";
+    out += "<tr><td><code>.rbxlx</code></td><td>Place XML</td><td><a href='#rbxlx' data-route='rbxlx'>Import RBXLX</a></td></tr>";
+    out += "<tr><td><code>.rbxm</code></td><td>Model binary</td><td><a href='#rbxm' data-route='rbxm'>Import RBXM</a>, <a href='#uploadrbxm' data-route='uploadrbxm'>Upload RBXM</a></td></tr>";
+    out += "<tr><td><code>.rbxmx</code></td><td>Model XML</td><td><a href='#rbxmx' data-route='rbxmx'>Import RBXMX</a>, <a href='#uploadrbxm' data-route='uploadrbxm'>Upload RBXM</a></td></tr>";
+    out += "<tr><td><code>.mp3 .ogg .wav</code></td><td>Audio</td><td><a href='#bypass' data-route='bypass'>Bypass Music</a></td></tr>";
+    out += "<tr><td><code>.png .jpg .bmp .tga</code></td><td>Gambar</td><td><a href='#image' data-route='image'>Upload Image</a></td></tr>";
+    out += "<tr><td><code>.png .jpg</code></td><td>Gambar sumber model</td><td><a href='#image3d' data-route='image3d'>Image to 3D</a></td></tr>";
+    out += "</tbody></table></div></section></main></div></div>";
+    return out;
+  }
+
+  function viewPersiapan() {
+    var out = '<div class="wrap"><div class="shell">' + sideNav("persiapan") + '<main class="main">';
+    out += '<div class="crumbs"><a href="#dashboard" data-route="dashboard">Dashboard</a> / Persiapan</div>';
+    out += '<div class="page-title"><div><h1>Persiapan</h1><p>Yang perlu disiapkan sekali sebelum memakai fitur apa pun.</p></div></div>';
+    out += '<section class="block"><h2>Langkah awal</h2><ol class="steps" style="--g:var(--cyan)">';
+    out += "<li><b>Siapkan executor</b><p>Executor harus punya fungsi file dan HTTP. Tabel di bawah menunjukkan fungsi mana dipakai fitur apa. Skrip dirancang untuk executor mobile seperti Delta, dan membaca folder workspace-nya.</p></li>";
+    out += "<li><b>Siapkan folder workspace</b><p>Taruh file kamu di folder workspace executor. Skrip memeriksa beberapa lokasi umum (<code>workspace</code>, <code>Delta/workspace</code>, <code>Android/Delta/workspace</code>) dan subfolder sampai 4 tingkat.</p></li>";
+    out += "<li><b>Jalankan skrip</b><p>Jalankan <code>xyurei_new_gui_v26.lua</code>. Landing page muncul, dan scan file berjalan otomatis setelah GUI terbuka.</p></li>";
+    out += "<li><b>Tekan Mulai Import</b><p>Dashboard terbuka. Klik kartu fitur, jendelanya keluar di kiri atau kanan dashboard.</p></li></ol></section>";
+    out += '<section class="block"><h2>Fungsi executor yang dipakai</h2><div class="table-wrap"><table><thead><tr><th>Fungsi</th><th>Gunanya</th><th>Dipakai oleh</th></tr></thead><tbody>';
+    REQS.forEach(function (r) { out += "<tr><td><code>" + r[0] + "</code></td><td>" + r[1] + "</td><td>" + r[2] + "</td></tr>"; });
+    out += "</tbody></table></div></section>";
+    out += '<section class="block"><h2>Cara kerja jendela dock</h2><ul class="notes" style="--g:var(--cyan)">';
+    out += "<li>Setiap fitur adalah jendela terpisah. Jendela baru muncul di sisi yang lebih kosong, lalu bergantian kiri dan kanan.</li>";
+    out += "<li>Geser jendela lewat header-nya, ubah ukuran lewat pojok kanan bawah, dan tekan <span class='btnchip'>DOCK</span> untuk merapikan semuanya kembali.</li>";
+    out += "<li>Tombol – di dashboard menyembunyikan seluruh GUI ke ikon bulat. Ketuk ikon itu untuk membukanya lagi.</li>";
+    out += "<li>Dashboard dan jendela fitur otomatis mengecil bila layar sempit.</li></ul></section>";
+    out += '<div class="pager"><a href="#dashboard" data-route="dashboard"><small>← Kembali</small><b>Dashboard</b></a><a href="#apikey" data-route="apikey"><small>Berikutnya →</small><b>Setup API Upload</b></a></div>';
+    out += "</main></div></div>";
+    return out;
+  }
+
+  function viewApiKey() {
+    var out = '<div class="wrap"><div class="shell">' + sideNav("apikey") + '<main class="main" style="--g:var(--c-upload)">';
+    out += '<div class="crumbs"><a href="#dashboard" data-route="dashboard">Dashboard</a> / Setup API Upload</div>';
+    out += '<div class="page-title"><div><h1>Setup API Upload</h1><p>Bypass Music, Upload Image, Upload Animasi, dan Upload RBXM memakai API Key Roblox Open Cloud yang sama. Cukup diisi sekali.</p></div></div>';
+    out += '<section class="block"><h2>Langkah</h2><ol class="steps">';
+    out += "<li><b>Buat API Key</b><p>Buka <code>create.roblox.com</code>, masuk ke Credentials, lalu buat API Key baru.</p></li>";
+    out += "<li><b>Tambahkan izin Assets</b><p>Tambahkan sistem <b>Assets</b> dengan izin <b>Read</b> dan <b>Write</b>.</p></li>";
+    out += "<li><b>Kosongkan batas IP</b><p>Kalau key dibatasi IP, upload dari HP atau PC lain akan ditolak dengan 403.</p></li>";
+    out += "<li><b>Catat User ID</b><p>User ID adalah angka ID akun pemilik asset yang akan diupload.</p></li>";
+    out += "<li><b>Masukkan ke GUI</b><p>Buka jendela upload apa pun, tekan ⚙, isi API Key dan User ID, tekan VALIDASI, lalu SIMPAN. Skrip mengecek User ID ke server Roblox dan memeriksa key dengan permintaan uji.</p></li></ol></section>";
+    out += '<section class="block"><h2>Catatan</h2><ul class="notes">';
+    out += "<li>Pengaturan tersimpan di <code>xyurei_music/bypass_cfg.json</code> bila executor punya <code>writefile</code>. Jaga file itu, karena isinya API Key.</li>";
+    out += "<li>Tombol SIMPAN baru aktif setelah VALIDASI berhasil. Mengubah isian membuat status validasi hilang.</li>";
+    out += "<li>Kolom URL relay diisi lewat <code>XYUREI_CONFIG.RELAY_URL</code> di skrip. Kalau kosong, upload langsung dari executor ke Roblox.</li>";
+    out += "<li>Kalau upload gagal dengan pesan FileContent, jalankan TES BINARY EXECUTOR dan TES MULTIPART di ⚙ Bypass Music.</li></ul></section>";
+    out += '<section class="block"><h2>Arti pesan error</h2><div class="table-wrap"><table><thead><tr><th>Kode</th><th>Arti</th></tr></thead><tbody>';
+    out += "<tr><td><code>401</code></td><td>API Key tidak valid.</td></tr><tr><td><code>403</code></td><td>Izin Assets kurang, key dibatasi IP, atau User ID bukan pemilik key.</td></tr><tr><td><code>429</code></td><td>Rate limit atau batas upload tercapai.</td></tr><tr><td><code>400</code></td><td>Request ditolak Roblox. Isi pesannya ditampilkan di GUI.</td></tr>";
+    out += "</tbody></table></div></section>";
+    out += '<div class="pager"><a href="#persiapan" data-route="persiapan"><small>← Sebelumnya</small><b>Persiapan</b></a><a href="#bypass" data-route="bypass"><small>Berikutnya →</small><b>Bypass Music</b></a></div>';
+    out += "</main></div></div>";
+    return out;
+  }
+
+  function viewFeature(f) {
+    var i = ORDER.indexOf(f.id);
+    var prev = BYID[ORDER[i - 1]], next = BYID[ORDER[i + 1]];
+    var out = '<div class="wrap"><div class="shell">' + sideNav(f.id) + '<main class="main ' + gcls(f) + '">';
+    out += '<div class="crumbs"><a href="#dashboard" data-route="dashboard">Dashboard</a> / ' + GROUPS[f.group].label + " / " + f.name + "</div>";
+    out += '<div class="page-title"><div><h1>' + f.name + "</h1><p>" + f.lead + "</p></div></div>";
+    out += '<div class="meta">' + f.meta.map(function (m) { return "<span>" + m[0] + " <b>" + m[1] + "</b></span>"; }).join("") + "</div>";
+    out += '<section class="block"><h2>Yang perlu disiapkan</h2><ul class="need">' + f.needs.map(function (n) { return "<li><span>" + n + "</span></li>"; }).join("") + "</ul></section>";
+    out += '<section class="block"><h2>Cara pakai</h2><ol class="steps">' + f.steps.map(function (s) { return "<li><b>" + s[0] + "</b><p>" + s[1] + "</p></li>"; }).join("") + "</ol>";
+    if (f.code) {
+      out += '<div class="code"><div class="cap"><span>' + f.code[0] + '</span><button type="button" data-copy>Salin</button></div><pre><code>' + esc(f.code[1]) + "</code></pre></div>";
+    }
+    out += "</section>";
+    out += '<section class="block"><h2>Tombol di jendela</h2><div class="table-wrap"><table><thead><tr><th>Tombol</th><th>Fungsi</th></tr></thead><tbody>' + f.buttons.map(function (b) { return '<tr><td><span class="btnchip">' + b[0] + "</span></td><td>" + b[1] + "</td></tr>"; }).join("") + "</tbody></table></div></section>";
+    out += '<section class="block"><h2>Catatan</h2><ul class="notes">' + f.notes.map(function (n) { return "<li>" + n + "</li>"; }).join("") + "</ul></section>";
+    out += '<section class="block"><h2>Kalau bermasalah</h2>' + f.trouble.map(function (t) { return "<details><summary>" + t[0] + "</summary><p>" + t[1] + "</p></details>"; }).join("") + "</section>";
+    out += '<div class="pager">';
+    out += prev ? '<a href="#' + prev.id + '" data-route="' + prev.id + '"><small>← Sebelumnya</small><b>' + prev.name + "</b></a>" : '<a href="#dashboard" data-route="dashboard"><small>← Kembali</small><b>Dashboard</b></a>';
+    out += next ? '<a href="#' + next.id + '" data-route="' + next.id + '"><small>Berikutnya →</small><b>' + next.name + "</b></a>" : '<a href="#dashboard" data-route="dashboard"><small>Selesai →</small><b>Dashboard</b></a>';
+    out += "</div></main></div></div>";
+    return out;
+  }
+
+  /* ---------------- ROUTER ---------------- */
+  /* ---------------- EFEK: chart, ticker, partikel ---------------- */
+  var REDUCED = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  var timers = [];
+  function cssVar(n, fb) { var v = getComputedStyle(document.documentElement).getPropertyValue(n).trim(); return v || fb; }
+  function palette() {
+    return { line: cssVar("--cyan", "#00d0ff"), up: cssVar("--ok", "#46f4b0"), down: cssVar("--danger", "#ff7a7a"), grid: cssVar("--line", "rgba(110,160,255,.17)"), bg: cssVar("--bg", "#01030a") };
+  }
+
+  function tickerHtml() {
+    var items = '<span><b>SIMULASI</b>ilustrasi, bukan data nyata</span>';
+    ORDER.forEach(function (id) {
+      var v = (Math.random() - 0.45) * 4;
+      items += '<span><b>' + BYID[id].name.toUpperCase() + '</b><em data-k="' + id + '" class="' + (v >= 0 ? "up" : "down") + '">' + (v >= 0 ? "▲ " : "▼ ") + Math.abs(v).toFixed(2) + "%</em></span>";
+    });
+    return '<div class="ticker" aria-hidden="true"><div class="track">' + items + items + "</div></div>";
+  }
+
+  function makeChart(canvas, kind) {
+    var ctx = canvas.getContext("2d");
+    var box = canvas.parentNode;
+    var pxEl = box.querySelector(".px"), chgEl = box.querySelector(".chg");
+    var N = kind === "candle" ? 46 : 72;
+    var stepMs = kind === "candle" ? 950 : 620;
+    var price = 1.25, trend = 0.003, candles = [];
+    function tick() {
+      if (Math.random() < 0.14) trend = (Math.random() - 0.5) * 0.014;
+      var o = price, hi = price, lo = price;
+      for (var i = 0; i < 4; i++) {
+        price += trend * 0.5 + (Math.random() - 0.5) * 0.02 + (1.25 - price) * 0.012;
+        if (price > hi) hi = price;
+        if (price < lo) lo = price;
+      }
+      return { o: o, c: price, h: hi + Math.random() * 0.004, l: lo - Math.random() * 0.004 };
+    }
+    for (var k = 0; k < N; k++) candles.push(tick());
+    var base = candles[0].c;
+    function head() {
+      var p = candles[candles.length - 1].c, pct = (p - base) / base * 100;
+      if (pxEl) pxEl.textContent = p.toFixed(4);
+      if (chgEl) { chgEl.className = "chg " + (pct >= 0 ? "up" : "down"); chgEl.textContent = (pct >= 0 ? "▲ " : "▼ ") + Math.abs(pct).toFixed(2) + "%"; }
+    }
+    head();
+    var col = palette(), frame = 0, t = 0, last = performance.now(), scroll = 0, sMin = null, sMax = null;
+
+    function draw(now) {
+      var dpr = Math.min(window.devicePixelRatio || 1, 2), w = canvas.clientWidth, h = canvas.clientHeight;
+      if (!w || !h) return;
+      var cw = Math.round(w * dpr), ch = Math.round(h * dpr);
+      if (canvas.width !== cw || canvas.height !== ch) { canvas.width = cw; canvas.height = ch; }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+      var padT = 14, padB = 14, dx = w / (N - 4);
+
+      var mn = Infinity, mx = -Infinity;
+      for (var i = 0; i < N; i++) { if (candles[i].l < mn) mn = candles[i].l; if (candles[i].h > mx) mx = candles[i].h; }
+      if (sMin === null) { sMin = mn; sMax = mx; }
+      sMin += (mn - sMin) * 0.08; sMax += (mx - sMax) * 0.08;
+      var span = Math.max(sMax - sMin, 0.0001);
+      function Y(v) { return padT + (1 - (v - sMin) / span) * (h - padT - padB); }
+      function X(i) { return w + (i - (N - 1)) * dx + (1 - t) * dx; }
+
+      /* grid */
+      ctx.lineWidth = 1; ctx.strokeStyle = col.grid; ctx.globalAlpha = 0.9;
+      ctx.beginPath();
+      for (var g = 1; g < 4; g++) { var gy = Math.round(h * g / 4) + 0.5; ctx.moveTo(0, gy); ctx.lineTo(w, gy); }
+      var sp = dx * 6;
+      for (var v = 0; v < w / sp + 2; v++) { var gx = Math.round(w - (scroll % sp) - v * sp) + 0.5; ctx.moveTo(gx, 0); ctx.lineTo(gx, h); }
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+
+      var lastC = candles[N - 1].c, prevC = candles[N - 2].c;
+      var edgeV = prevC + (lastC - prevC) * t;
+
+      if (kind === "candle") {
+        var bw = Math.max(2, dx * 0.56);
+        for (var j = 0; j < N; j++) {
+          var cx = X(j);
+          if (cx > w - bw / 2 || cx < -bw) continue;
+          var c = candles[j], isUp = c.c >= c.o, cc = isUp ? col.up : col.down;
+          ctx.strokeStyle = cc; ctx.fillStyle = cc; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(Math.round(cx) + 0.5, Y(c.h)); ctx.lineTo(Math.round(cx) + 0.5, Y(c.l)); ctx.stroke();
+          var top = Y(Math.max(c.o, c.c)), bh = Math.max(1.5, Math.abs(Y(c.o) - Y(c.c)));
+          ctx.fillRect(cx - bw / 2, top, bw, bh);
+        }
+        /* garis harga terakhir */
+        var ly = Y(edgeV);
+        ctx.setLineDash([4, 4]); ctx.strokeStyle = col.line; ctx.globalAlpha = 0.7;
+        ctx.beginPath(); ctx.moveTo(0, ly); ctx.lineTo(w, ly); ctx.stroke();
+        ctx.setLineDash([]); ctx.globalAlpha = 1;
+      } else {
+        ctx.beginPath();
+        var started = false;
+        for (var q = 0; q < N; q++) {
+          var px = X(q);
+          if (px > w) break;
+          if (!started) { ctx.moveTo(px, Y(candles[q].c)); started = true; } else ctx.lineTo(px, Y(candles[q].c));
+        }
+        ctx.lineTo(w, Y(edgeV));
+        /* area */
+        var area = new Path2D();
+        ctx.save();
+        ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath();
+        var grad = ctx.createLinearGradient(0, 0, 0, h);
+        grad.addColorStop(0, col.line); grad.addColorStop(1, col.bg);
+        ctx.globalAlpha = 0.28; ctx.fillStyle = grad; ctx.fill();
+        ctx.restore();
+        /* garis */
+        ctx.beginPath(); started = false;
+        for (var r = 0; r < N; r++) {
+          var rx = X(r);
+          if (rx > w) break;
+          if (!started) { ctx.moveTo(rx, Y(candles[r].c)); started = true; } else ctx.lineTo(rx, Y(candles[r].c));
+        }
+        ctx.lineTo(w, Y(edgeV));
+        ctx.lineJoin = "round"; ctx.lineWidth = 2; ctx.strokeStyle = col.line;
+        ctx.shadowColor = col.line; ctx.shadowBlur = 12; ctx.stroke(); ctx.shadowBlur = 0;
+      }
+
+      /* titik harga live */
+      var pulse = 3 + Math.sin(now / 280) * 1.4, dy = Y(edgeV);
+      ctx.fillStyle = col.line; ctx.globalAlpha = 0.25;
+      ctx.beginPath(); ctx.arc(w - 4, dy, pulse + 4, 0, 6.2832); ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.beginPath(); ctx.arc(w - 4, dy, 3, 0, 6.2832); ctx.fill();
+    }
+
+    function loop(now) {
+      if (!canvas.isConnected) return;
+      var dt = Math.min(now - last, 200); last = now;
+      t += dt / stepMs;
+      scroll += (dt / stepMs) * (canvas.clientWidth / (N - 4));
+      while (t >= 1) { t -= 1; candles.push(tick()); candles.shift(); head(); }
+      if (++frame % 60 === 0) col = palette();
+      draw(now);
+      requestAnimationFrame(loop);
+    }
+    if (REDUCED) { t = 1; draw(0); } else requestAnimationFrame(loop);
+  }
+
+  function startFx() {
+    document.querySelectorAll("canvas.chart").forEach(function (cv) { makeChart(cv, cv.getAttribute("data-kind")); });
+    var tk = document.querySelector(".ticker");
+    if (tk && !REDUCED) {
+      timers.push(setInterval(function () {
+        var ems = tk.querySelectorAll("em[data-k]");
+        for (var n = 0; n < 4; n++) {
+          var key = ORDER[Math.floor(Math.random() * ORDER.length)], v = (Math.random() - 0.45) * 4;
+          tk.querySelectorAll('em[data-k="' + key + '"]').forEach(function (em) {
+            em.className = v >= 0 ? "up" : "down";
+            em.textContent = (v >= 0 ? "▲ " : "▼ ") + Math.abs(v).toFixed(2) + "%";
+          });
+        }
+        void ems;
+      }, 1300));
+    }
+  }
+  function stopFx() { timers.forEach(clearInterval); timers = []; }
+
+  /* partikel latar */
+  (function () {
+    var cv = document.getElementById("bg");
+    if (!cv || REDUCED) return;
+    var ctx = cv.getContext("2d"), P = [], W = 0, H = 0, f = 0, c = palette().line;
+    function spawn() { return { x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - 0.5) * 0.3, vy: -(0.12 + Math.random() * 0.32), r: 1 + Math.random() * 1.6 }; }
+    function size() {
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = window.innerWidth; H = window.innerHeight;
+      cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      var n = Math.min(54, Math.round(W * H / 24000));
+      while (P.length < n) P.push(spawn());
+      P.length = n;
+    }
+    size();
+    window.addEventListener("resize", size);
+    function loop() {
+      ctx.clearRect(0, 0, W, H);
+      if (++f % 120 === 0) c = palette().line;
+      ctx.fillStyle = c; ctx.strokeStyle = c; ctx.lineWidth = 1;
+      for (var i = 0; i < P.length; i++) {
+        var p = P[i];
+        p.x += p.vx; p.y += p.vy;
+        if (p.y < -8) { p.y = H + 8; p.x = Math.random() * W; }
+        if (p.x < -8) p.x = W + 8; else if (p.x > W + 8) p.x = -8;
+        ctx.globalAlpha = 0.5;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.2832); ctx.fill();
+        for (var j = i + 1; j < P.length; j++) {
+          var q = P[j], dx = p.x - q.x, dy = p.y - q.y, d2 = dx * dx + dy * dy;
+          if (d2 < 14400) {
+            ctx.globalAlpha = (1 - d2 / 14400) * 0.2;
+            ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
+          }
+        }
+      }
+      ctx.globalAlpha = 1;
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+  })();
+
+  var current = null;
+  function render(route) {
+    stopFx();
+    if (!route || (route !== "home" && route !== "dashboard" && route !== "persiapan" && route !== "apikey" && !BYID[route])) route = "home";
+    current = route;
+    var html;
+    if (route === "home") html = viewHome();
+    else if (route === "dashboard") html = viewDashboard();
+    else if (route === "persiapan") html = viewPersiapan();
+    else if (route === "apikey") html = viewApiKey();
+    else html = viewFeature(BYID[route]);
+    app.innerHTML = html;
+    document.querySelectorAll(".top nav a[data-nav]").forEach(function (a) {
+      if (a.getAttribute("data-nav") === route) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+    });
+    if (route === "dashboard") wireDashboard();
+    startFx();
+    window.scrollTo(0, 0);
+  }
+  function go(route) {
+    render(route);
+    try { history.replaceState(null, "", "#" + route); } catch (e) { /* hash tidak selalu bisa diubah di frame */ }
+  }
+
+  function wireDashboard() {
+    var q = document.getElementById("q"), cards = document.querySelectorAll("#cards .card"), none = document.getElementById("none");
+    var filter = "all";
+    function apply() {
+      var term = q.value.trim().toLowerCase(), shown = 0;
+      cards.forEach(function (c) {
+        var ok = (filter === "all" || c.getAttribute("data-g") === filter) && (!term || c.getAttribute("data-hay").indexOf(term) !== -1);
+        c.hidden = !ok;
+        if (ok) shown++;
+      });
+      none.hidden = shown !== 0;
+    }
+    q.addEventListener("input", apply);
+    document.querySelectorAll(".filters button").forEach(function (b) {
+      b.addEventListener("click", function () {
+        filter = b.getAttribute("data-f");
+        document.querySelectorAll(".filters button").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+        apply();
+      });
+    });
+  }
+
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest("[data-route]");
+    if (a) { e.preventDefault(); go(a.getAttribute("data-route")); return; }
+    var cb = e.target.closest("[data-copy]");
+    if (cb) {
+      var code = cb.closest(".code").querySelector("code");
+      var text = code.textContent;
+      var done = function (ok) { cb.textContent = ok ? "Tersalin" : "Teks terpilih"; setTimeout(function () { cb.textContent = "Salin"; }, 1600); };
+      var fallback = function () {
+        try { var r = document.createRange(); r.selectNodeContents(code); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); } catch (err) { /* abaikan */ }
+        done(false);
+      };
+      try { navigator.clipboard.writeText(text).then(function () { done(true); }, fallback); } catch (err) { fallback(); }
+    }
+  });
+  window.addEventListener("hashchange", function () {
+    var r = location.hash.replace("#", "");
+    if (r !== current) render(r);
+  });
+
+  /* tema */
+  var themeBtn = document.getElementById("themeBtn");
+  themeBtn.addEventListener("click", function () {
+    var root = document.documentElement;
+    var isLight = root.getAttribute("data-theme") === "light";
+    root.setAttribute("data-theme", isLight ? "dark" : "light");
+  });
+
+  render(location.hash.replace("#", ""));
+})();
+</script>
+
+</body>
+</html>
